@@ -1,0 +1,34 @@
+{
+    "account":["faker","pace"],
+    "bidProbability":1,
+    "bidControl":{"fixedBidCpmInMicros":0,"type":"RELAY"},
+    "creatives":[
+    {
+        "exchangeFilter":{"include":["youku"]},
+        "format":"640x480",
+        "id":0,
+        "name":"0",
+        "providerConfig":
+        {
+            "youku":
+            {
+                "crid":"crid1",
+                "nurl":"http://relay.bigtree.mobi:13898/win_notice?price=${AUCTION_PRICE}&params=${AUCTION_ID}",
+                "adm":"http://bttest.qiniudn.com/1/1107185038-552008732/552008732_1431337249.jpg",
+                "ldp":"https://itunes.apple.com/cn/app/chao-shen-zhan-ji-guo-min/id967694144?l=zh&ls=1&mt=8",
+                "cm":["http://nbb-toutiao.bigtree.mobi:13898/click?params=${AUCTION_ID}"],
+                "pm":["http://nbb-toutiao.bigtree.mobi:13898/impression?params=${AUCTION_ID}"],
+                "image_width":640,"image_height":480
+            }
+        }
+    }
+    ],
+    "errorFormat":"lightweight",
+    "external":false,
+    "externalId":0,
+    "lossFormat":"lightweight",
+    "maxInFlight":20000,
+    "minTimeAvailableMs":5.0,
+    "test":false,
+    "winFormat":"full"
+}

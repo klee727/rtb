@@ -7,14 +7,18 @@ import (
 	zmq "github.com/yangzhao28/zmq3"
 )
 
+//
+//
+//
 type ZmqRouter struct {
 	Name            string
 	Connections     map[string]*zmq.Socket
 	ConnectionNames map[*zmq.Socket]string
 	Poller          *zmq.Poller
-	lock            sync.Mutex
+	Quit            bool
+	OnRecvMessage   func(name string, socket *zmq.Socket)
 
-	OnRecvMessage func(name string, socket *zmq.Socket)
+	lock sync.Mutex
 }
 
 func NewZmqRouter(name string) *ZmqRouter {
@@ -23,6 +27,7 @@ func NewZmqRouter(name string) *ZmqRouter {
 		Connections:     make(map[string]*zmq.Socket),
 		ConnectionNames: make(map[*zmq.Socket]string),
 		Poller:          zmq.NewPoller(),
+		Quit:            bool,
 	}
 }
 
@@ -56,7 +61,7 @@ func (this *ZmqRouter) CloseConnection(name string) {
 	}
 }
 
-func (this *ZmqRouter) SendMessage(name string, msg ...interface{}) error {
+func (this *ZmqRouter) SendMessageTo(name string, msg ...interface{}) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if conn, ok := this.Connections[name]; ok {
@@ -67,7 +72,7 @@ func (this *ZmqRouter) SendMessage(name string, msg ...interface{}) error {
 	return nil
 }
 
-func (this *ZmqRouter) SendMessageToAll(msg ...interface{}) error {
+func (this *ZmqRouter) SendMessage(msg ...interface{}) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	for _, sock := range this.Connections {
@@ -78,8 +83,14 @@ func (this *ZmqRouter) SendMessageToAll(msg ...interface{}) error {
 	return nil
 }
 
+func (this *ZmqRouter) Close() {
+	this.CloseConnection()
+	this.Quit = true
+}
+
 func (this *ZmqRouter) MessageLoop() {
-	for {
+	this.Quit = false
+	for !this.Quit {
 		polled, err := this.Poller.Poll(time.Second)
 		if err != nil {
 			continue
@@ -93,54 +104,3 @@ func (this *ZmqRouter) MessageLoop() {
 		}
 	}
 }
-
-/*
-func main() {
-	zk := NewServiceBase([]string{"0.0.0.0:2181"}, "mtl")
-	// agent config
-	configService, _ := zk.GetEndpointAddress("rtbAgentConfiguration", "agents")
-
-	rand.Seed(time.Now().Unix())
-	name := "faker_" + strconv.Itoa(rand.Int())
-
-	r := NewZmqRouter(name)
-	r.NewConnection(configService, zmq.DEALER)
-	r.SendMessage("CONFIG", name, jsConfig)
-
-	routerService, _ := zk.GetEndpointAddress("rtbRequestRouter", "agents")
-	s := NewZmqRouter(name)
-	s.OnConnect = func(connectTo string, sock *zmq.Socket) {
-		sock.SendMessage(connectTo, "CONFIG", name)
-	}
-	s.NewConnection(routerService, zmq.DEALER)
-	s.OnRecvMessage = func(sock *zmq.Socket) {
-		msg, err := sock.RecvMessage(0)
-		if err != nil {
-			return
-		}
-		fmt.Println(msg)
-		if len(msg) == 0 {
-			return
-		}
-		switch msg[0] {
-		case "GOTCONFIG":
-			fmt.Println("receive router config response")
-		case "PING0":
-			if len(msg) < 2 {
-				return
-			}
-			received := msg[1]
-			now := fmt.Sprintf("%.5f", float64(time.Now().UnixNano())/1e9)
-			sock.SendMessage("PONG0", received, now, msg)
-		case "PING1":
-			if len(msg) < 2 {
-				return
-			}
-			// payload := msg[2:]
-		case "BYEBYE":
-			fmt.Println("rejected by router, need reconnect")
-		}
-	}
-	s.MessageLoop()
-}
-*/

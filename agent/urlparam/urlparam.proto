@@ -1,0 +1,47 @@
+package urlparam;
+
+message TdSegmentInfo {
+    optional string deviceId = 1;
+    optional string deviceIdType = 2;
+    optional string deviceIdEncode = 3;
+    optional string segmentId = 4;
+}
+
+message UrlParam {
+    required string auctionId = 1;
+    required double biddingTimestamp = 2;
+    required string impressionId = 3;
+    required string userIds = 4;
+    required string account = 5;
+    required string creativeId = 6;
+    required int32 bigtreeAppId = 7;
+    required string ip = 8;
+    required string os = 9;
+    required string exchange = 10;
+    required string provider = 11;
+    required string deviceId = 12;
+    optional string chargeType = 13;
+    optional string chargePrice = 14;
+
+    repeated int32 tagsHash = 15;
+    repeated int32 ipHash = 16;
+    optional string creativeHash = 17;  
+
+    optional TdSegmentInfo tdSegmentInfo = 18;
+
+    optional string mac = 19;
+
+    optional int64 bidPrice = 20;
+
+    optional string osVersion = 21;
+    optional string deviceModel = 22;
+    optional string advId = 24;         
+
+    optional string agent = 23;
+
+    optional string biddingKey = 25;
+
+    optional string adunitId = 26;      
+    optional int32 deviceType = 27;     
+    optional int32 connectionType = 28; 
+}
